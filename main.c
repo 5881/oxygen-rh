@@ -170,12 +170,12 @@ static void lcd_adc(uint16_t data){
 }
 uint16_t mesure(void){
 	unsigned int temp=0;
-	for(unsigned int i=0; i<128;i++){
+	for(unsigned int i=0; i<1024;i++){
 		adc_start_conversion_regular(ADC1);
 		while (!(adc_eoc(ADC1)));
 		temp += adc_read_regular(ADC1);	
 		}
-	return temp>>7;
+	return temp>>10;
 	//return temp;
 	}
 
@@ -187,15 +187,10 @@ static void test_lcd(){
 	bufer_clear();
 	mv=(3300*data)>>12;
 	mv-=356;
-	
 	o=mv/19;
-	
-	
 	rh=sht_read_rh();
 	t=sht_read_t();
 	ro=sht_ro(rh,t);
-	
-	
 	rh/=10;
 	t/=10;
 	ro/=10;
@@ -207,13 +202,49 @@ static void test_lcd(){
 }
 
 
+static void indicate(){
+	char bufer[256];
+	uint16_t temp,rh,t,data,ro,o;
+	uint32_t mv;
+	float V,RH,T,RO;
+	data=mesure();
+	bufer_clear();
+	mv=(3300*data)>>12;
+	//mv=(3300*data)>>10;
+	if(mv>356) mv-=356; else mv=0;
+	o=mv*100/472;
+	rh=sht_read_rh();
+	t=sht_read_t();
+	ro=sht_ro(rh,t);
+	rh/=10;
+	t/=10;
+	ro/=10;
+	
+	//lcdstr_at("wather oxygen",1,0);
+	snprintf(bufer,256,"%d.%d\n%d.%d%",ro/10,ro%10,o/10,o%10);
+	lcdstrx2_at(bufer, 0,0);
+	lcdstr_at("wather",8,0);
+	lcdstr_at("mg/l",8,1);
+	lcdstr_at("oxygen",8,2);
+	lcdstr_at("%",8,3);
+	snprintf(bufer,256,"RH:%d.%d %dmv",rh/10,rh%10,mv);
+	lcdstr_at(bufer,0,5);
+	snprintf(bufer,256,"T:%d.%d C", t/10,t%10);
+	lcdstr_at(bufer,1,4);
+	//draw_rectangle(0,0,83,32);
+	//drawLine(45,0,45,32);
+	//drawLine(43,0,43,32);
+	bufer_send();
+}
+
+
 static void logo(void){
 	bufer_clear();
 	lcdstr_at("The best",3,0);
 	lcdstr_at("Oxygen sensoR!",0,1);
-	lcdstr_at("v. 1.9",3,2);
+	lcdstr_at("v. 1.99",3,2);
 	lcdstrx2_at("SHAMAN",2,3);
-	lcdstr_at("28 apr. 2019",0,5);
+	lcdstr_at("29 apr. 2019",0,5);
 	//drawLine(0, 7, 83,7);
 	//draw_circle(42,24,23);
 	//draw_rectangle(0,0,83,47);
@@ -241,7 +272,9 @@ int main(void){
 		for(int i=0;i<0xffff;i++)__asm__("nop");
 		//temp = mesure();
 		//lcd_adc(temp);
-		test_lcd();	
+		//test_lcd();
+		indicate();	
+		
 		};
 		
 return 0;

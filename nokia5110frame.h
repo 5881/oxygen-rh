@@ -276,7 +276,7 @@ void lcdinit(void){
 	for (unsigned char i=0;i<70;i++)
 	gpio_set(SPI_PORT,RST);
 	lcdsend(CMD, 0x21 );  // LCD Extended Commands. 
-	lcdsend(CMD, 0xb9 );  // Set LCD Vop (Contrast). 
+	lcdsend(CMD, 0xc0 );  // Set LCD Vop (Contrast). 
 	lcdsend(CMD, 0x04 );  // Set Temp coefficent. //0x04
 	lcdsend(CMD, 0x14 );  // LCD bias mode 1:48. //0x13
 	lcdsend(CMD, 0x20 );  // LCD Basic Commands
